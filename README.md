@@ -64,5 +64,5 @@ Contributions are welcome! Feel free to submit issues or pull requests on GitHub
 
 ## License
 
-CAT License © ethandacat
+[CAT License](https://github.com/ethandacat/discourse-extras/blob/main/LICENSE.MD) © ethandacat
 
