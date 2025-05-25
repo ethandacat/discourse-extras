@@ -14,4 +14,5 @@ You must retain this License, in its entirety, on all copies or substantial port
 4. Respectful Use
 You agree to treat all cats, both real and digital, with due respect. This includes refraining from any actions that could result in harm, discomfort, or disservice to cats. This clause is binding in spirit if not in strict letter.
 5. Warranty Disclaimer
+
 THE CATWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE CATWARE OR THE USE OR OTHER DEALINGS IN THE CATWARE.
