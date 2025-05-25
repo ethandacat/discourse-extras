@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Discourse Extras
 // @namespace    ethandacatProductions
-// @version      2.0
+// @version      2.1
 // @description  More for viewing, less for writing.
 // @author       ethandacat
 // @match        https://x-camp.discourse.group/*
@@ -100,8 +100,23 @@ function gText(element) {
                 mna = `<a class='mention'>${arg} ${argt}</a>`;
                 break;
             case "pm":
+                try{
                 var username = document.querySelector("img.avatar").src.split("/")[6];
-                mna = `<blockquote>${decodeObfuscated(arg, username)}</blockquote>`;
+                var argspl = arg.split("|:|")
+                var arg1 = decodeObfuscated(argspl[0],username)
+                var arg2 = decodeObfuscated(argspl[1],username)
+                if (arg1=="[This message is NOT for you!]"&&arg2=="[This message is NOT for you!]"){
+                    mna = `<blockquote>[This message is NOT for you!]</blockquote>`;
+                    break;
+                }
+                else if (arg1=="[This message is NOT for you!]") {
+                    mna = `<blockquote>${arg2}</blockquote>`
+                    break;
+                }
+                mna = `<blockquote>${arg1}</blockquote>`;
+                }catch{
+                mna = `<blockquote>Incorrectly formatted message</blockquote>`
+                }
                 break;
             default:
                 mna = "<span style='color:red; background-color:yellow; padding:1px; margin:1px; border: 1px solid red; '>Invalid Discourse Extras Tag!</span>";
@@ -143,6 +158,17 @@ const observer = new MutationObserver(mutations => {
                 }
                 // If the added node has children, check them for .cooked elements
                 node.querySelectorAll('.chat-message-text').forEach(cookedElement => {
+                    processCookedElement(cookedElement);
+                });
+            }
+            // Check if the added node is an element
+            if (node.nodeType === Node.ELEMENT_NODE) {
+                // If it's a .cooked element, process it
+                if (node.classList.contains('d-editor-preview')) {
+                    processCookedElement(node);
+                }
+                // If the added node has children, check them for .cooked elements
+                node.querySelectorAll('.d-editor-preview').forEach(cookedElement => {
                     processCookedElement(cookedElement);
                 });
             }
@@ -250,7 +276,8 @@ function doit(){
         }else{
             key = document.querySelector(".dextra-useryay").value;
         }
-        GM_setClipboard("!{pm "+encodeObfuscated("dextrapm"+val, key)+"}");
+        var username = document.querySelector("img.avatar").src.split("/")[6];
+        GM_setClipboard("!{pm "+encodeObfuscated("dextrapm"+val, key)+"|:|"+encodeObfuscated("dextrapm"+val,username)+"}");
         ele.remove();
     }
     ele.querySelector(".dextra-hailnah").onclick = function() {ele.remove()}
