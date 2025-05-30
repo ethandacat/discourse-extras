@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Discourse Extras
 // @namespace    ethandacatProductions
-// @version      2.1
+// @version      2.2
 // @description  More for viewing, less for writing.
 // @author       ethandacat
 // @match        https://x-camp.discourse.group/*
@@ -10,6 +10,44 @@
 // @downloadURL  https://github.com/ethandacat/flask-hello-world/raw/refs/heads/main/api/world/d-extra/d-extra.user.js
 // @updateURL    https://github.com/ethandacat/flask-hello-world/raw/refs/heads/main/api/world/d-extra/d-extra.user.js
 // ==/UserScript==
+
+async function showRaw(postId) {
+  const response = await fetch(`/posts/${postId}.json`);
+  const data = await response.json();
+  console.log(data.raw);
+  return data.raw;
+}
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+const rawbuttonhtml = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" class="fa d-icon svg-icon svg-string"><path d="M593.8 59.1H46.2C20.7 59.1 0 79.8 0 105.2v301.5c0 25.5 20.7 46.2 46.2 46.2h547.7c25.5 0 46.2-20.7 46.1-46.1V105.2c0-25.4-20.7-46.1-46.2-46.1zM338.5 360.6H277v-120l-61.5 76.9-61.5-76.9v120H92.3V151.4h61.5l61.5 76.9 61.5-76.9h61.5v209.2zm135.3 3.1L381.5 256H443V151.4h61.5V256H566z"/></svg>
+<span aria-hidden="true">
+        </span>
+`
+
+
+function doesFAIconExist(iconClass) {
+  // Create temp element
+  const el = document.createElement('i');
+  el.className = `fa fa-${iconClass}`;
+  el.style.position = 'absolute';
+  el.style.visibility = 'hidden';
+  document.body.appendChild(el);
+
+  // Check computed style (content)
+  const style = window.getComputedStyle(el, '::before');
+  const content = style.getPropertyValue('content');
+
+  document.body.removeChild(el);
+
+  return content && content !== 'none' && content !== '""';
+}
 
 function encodeObfuscated(str, key) {
   let strBytes = new TextEncoder().encode(str);
@@ -60,15 +98,16 @@ function descCode(element) {
 
 function gText(element) {
     const avoid = /<*>/
-    const regex = /!\{(.*?)\}/g; // Match !{stuff} normally
+    const regex = /!\{(.*?)\}/gs;
     const matches = [];
     const input = element.innerHTML;
     // Replace !{stuff} with an empty string and store the matches
     const cleanedText = input.replace(regex, (match, p1) => {
         var mna;
-        const ql = p1.split(" ");
+        const ql = p1.split("</p>").join("").split("<p>").join("").split(/[\n ]+/);;
         const cmd = ql[0];
         const arg = ql[1];
+        console.log(cmd);
         const argt = ql.slice(2).join(" ");
         switch (cmd) {
             case "phantom":
@@ -118,6 +157,12 @@ function gText(element) {
                 mna = `<blockquote>Incorrectly formatted message</blockquote>`
                 }
                 break;
+            case "html":
+                mna = `<iframe srcdoc="${arg} ${argt}"></iframe>`
+                break;
+            case "emoji":
+                mna = `<svg class="fa d-icon svg-icon svg-string" xmlns="http://www.w3.org/2000/svg"><use href="#${arg}"></use></svg>`;
+                break;
             default:
                 mna = "<span style='color:red; background-color:yellow; padding:1px; margin:1px; border: 1px solid red; '>Invalid Discourse Extras Tag!</span>";
                 break;
@@ -130,60 +175,74 @@ function gText(element) {
 }
 
 // Function to process .cooked elements
-function processCookedElement(element) {
-    const result = gText(element); // Get cleaned text and extracted content
-    element.innerHTML = result; // Update the element's innerHTML
+function processCookedElement(element, iscooked=false) {
+    // call gText() and update element
+    const result = gText(element);
+    element.innerHTML = result;
+    const fpo = element.parentElement;
+    if (iscooked){
+    // Check if button already exists — prevent duplicates
+    const place = fpo.querySelector(".post-menu-area .post-controls .actions");
+    if (!place.querySelector(".dextra-md")) {
+        var button = document.createElement("button");
+        button.innerHTML = rawbuttonhtml;
+        button.classList = "btn no-text btn-icon btn-flat dextra-md";
+
+        button.onclick = function() {
+            const postId = Number(fpo.parentElement.parentElement.parentElement.getAttribute('data-post-id'));
+            var dialog = document.createElement("div");
+            const place = document.querySelector(".discourse-root");
+            showRaw(postId).then(raw => {
+                const escaped = escapeHtml(raw);
+                dialog.innerHTML = `
+                <div class="modal-container">
+                    <div class="modal d-modal create-invite-modal" role="dialog" aria-modal="true" aria-labelledby="discourse-modal-title">
+                        <div class="d-modal__container">
+                            <div class="d-modal__header">
+                                <div class="d-modal__title">
+                                    <h1 id="discourse-modal-title" class="d-modal__title-text">Raw markdown content</h1>
+                                </div>
+                                <button class="btn no-text btn-icon btn-transparent modal-close dextra-hehe" title="close" type="button">
+                                    <svg class="fa d-icon d-icon-xmark svg-icon svg-string" xmlns="http://www.w3.org/2000/svg"><use href="#xmark"></use></svg>
+                                    <span aria-hidden="true"></span>
+                                </button>
+                            </div>
+                            <div class="d-modal__body" tabindex="-1">
+                                <p><pre><code class="hljs lang-markdown language-markdown">${escaped}</code></pre></p>
+                            </div>
+                            <div class="d-modal__footer">
+                                <button class="btn btn-text btn-primary dextra-lolzies" autofocus="true" type="button">
+                                    <span class="d-button-label">Close</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-modal__backdrop"></div>
+                </div>`;
+
+                dialog.querySelector(".dextra-lolzies").onclick = () => dialog.remove();
+                dialog.querySelector(".dextra-hehe").onclick = () => dialog.remove();
+
+                place.appendChild(dialog);
+            });
+        };
+
+        var editbutton = place.querySelector(".post-action-menu__show-more");
+        place.insertBefore(button, editbutton);
+    }}
 }
+setInterval(() => {
+    document.querySelectorAll(".cooked").forEach(element => {
+        processCookedElement(element, true);
+    })
+    document.querySelectorAll(".chat-message-text").forEach(element => {
+        processCookedElement(element, true);
+    })
+    document.querySelectorAll(".d-editor-preview").forEach(element => {
+        processCookedElement(element, true);
+    })
+},800)
 
-// Create a MutationObserver to watch for added nodes
-const observer = new MutationObserver(mutations => {
-    mutations.forEach(mutation => {
-        mutation.addedNodes.forEach(node => {
-            // Check if the added node is an element
-            if (node.nodeType === Node.ELEMENT_NODE) {
-                // If it's a .cooked element, process it
-                if (node.classList.contains('cooked')) {
-                    processCookedElement(node);
-                }
-                // If the added node has children, check them for .cooked elements
-                node.querySelectorAll('.cooked').forEach(cookedElement => {
-                    processCookedElement(cookedElement);
-                });
-            }
-            // Check if the added node is an element
-            if (node.nodeType === Node.ELEMENT_NODE) {
-                // If it's a .cooked element, process it
-                if (node.classList.contains('chat-message-text')) {
-                    processCookedElement(node);
-                }
-                // If the added node has children, check them for .cooked elements
-                node.querySelectorAll('.chat-message-text').forEach(cookedElement => {
-                    processCookedElement(cookedElement);
-                });
-            }
-            // Check if the added node is an element
-            if (node.nodeType === Node.ELEMENT_NODE) {
-                // If it's a .cooked element, process it
-                if (node.classList.contains('d-editor-preview')) {
-                    processCookedElement(node);
-                }
-                // If the added node has children, check them for .cooked elements
-                node.querySelectorAll('.d-editor-preview').forEach(cookedElement => {
-                    processCookedElement(cookedElement);
-                });
-            }
-        });
-    });
-});
-
-// Start observing the document for changes
-observer.observe(document.body, {
-    childList: true, // Observe direct children
-    subtree: true // Observe all descendants
-});
-
-// Initial processing of existing .cooked elements
-document.querySelectorAll('.cooked').forEach(processCookedElement);
 
 function doit(){
     var droot = document.querySelector(".discourse-root");
@@ -301,4 +360,5 @@ var ab = document.createElement("li");
     ab.innerHTML = bcode;
     ab.onclick = doit;
     document.querySelector("#sidebar-section-content-community").appendChild(ab);
+    document.querySelectorAll('.cooked').forEach(processCookedElement);
 }, 1000)
