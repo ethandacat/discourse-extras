@@ -1,68 +1,98 @@
-# Discourse Extras 2.1
+# Discourse Extras
+>  Current version !{color green}v2.3!{s}
+Last update [date=2025-05-31 time=10:09:00 timezone="Pacific/Honolulu"]
 
-Enhance your Discourse experience with **Discourse Extras**, a powerful userscript adding new features and improving existing ones. Version 2.1 introduces visibility of PMs you send, live preview support, and more!
-
----
-
-## Features
-
-- **View Sent PMs**  
-  Now you can see private messages you send to others — no longer limited to received PMs only. Easily review, quote, or reference your outgoing messages from one place.
-
-- **Live Preview Support**  
-  Discourse Extras integrates with the post editor’s live preview pane, showing your custom enhancements and markdown effects instantly while you type.
-
-- **Improved Stability**  
-  Minor bug fixes reduce error crashes for smoother, more reliable operation.
+A userscript to extend Discourse post rendering with extra visual and secret-message features.  
+**More for viewing, less for writing.**
 
 ---
 
-## Installation
+## !{emoji flag} Features
 
-Discourse Extras is distributed as a userscript compatible with popular userscript managers such as Tampermonkey or Greasemonkey.
-
-1. Install [Tampermonkey](https://www.tampermonkey.net/) (or equivalent) in your browser.
-2. Download the latest Discourse Extras script from the [Releases](https://github.com/your-repo/discourse-extras/releases) page.
-3. Open the script in Tampermonkey and enable it.
-4. Reload your Discourse forum to activate the extras.
-
----
-
-## Usage
-
-- Access your PM inbox as usual.  
-- Sent PMs will appear alongside received ones.  
-- While typing posts, view Discourse Extras’ features live in the preview pane.
+- !{emoji square-check} Custom markdown tags like `!​{color red}`, `!​{style ...}`, `!​{embed}`, etc.
+- !{emoji gear} Obfuscated private messages with per-user visibility
+- !{emoji palette} Inline styling for posts (color, background, font size)
+- !{emoji flask} Auto-injected message encoding modal
+- !{emoji thumbtack} Mutation observer for live content injection in `.cooked` and `.chat-message-text`
 
 ---
 
-## Under the Hood
+## !{emoji screwdriver-wrench} Installation
 
-- Reduced crashes with minor bug fixes
-- Performance improvements
+Install with a userscript manager like **Violentmonkey** or **Tampermonkey**:
 
----
-
-## Roadmap (Coming Soon)
-
-- **Full LaTeX Support**  
-  Break free from forum restrictions and use full LaTeX in posts.
-
-- **Markdown Compatibility**  
-  Seamlessly integrate Discourse Extras with native Markdown syntax.
-
-- **Custom HTML**  
-  Add your own HTML snippets for richer post formatting.
+- [Direct install link](https://github.com/ethandacat/discourse-extras/raw/refs/heads/main/main.user.js)
 
 ---
 
-## Contributing
+## !{emoji star} Custom Tags
 
-Contributions are welcome! Feel free to submit issues or pull requests on GitHub.
+These work inside posts, chat, and the editor preview in Discourse:
+
+|Tag | Usage Example | Result|
+|--- | --- | ---|
+|`!​{phantom}` | Hidden content | *(renders nothing)*|
+|`!​{bgc red}` | Background color | `red` background span|
+|`!​{color blue}` | Text color | Blue-colored span|
+|`!​{style color:red}` | Custom inline style | Any style applied via span|
+|`!​{size 24}` | Font size | `24px` font-size span|
+|`!​{codepen examplePerson project}` | Embed CodePen project | Loads the CodePen project by examplePerson with ID project.|
+|`!​{embed <link>}` | Embed external link | Loads iframe preview|
+|`!​{mention @bob}` | Mention someone without giving notifications. | `<a class='mention'>@bob</a>`|
+|`!​{pm ...}` | Private message (obfuscated) | Only visible to targeted user|
+|`!​{s}` | Close span | Ends the current style span|
+|`!​{html} <h1>v2.2 out now!</h1>` | Render custom HTML | `<h1>v2.2 out now!</h1>`|
+|`!{emoji twitter brands}` | Render icons from FontAwesome. By default, the kit is `fa-solid`. | Shows the twitter logo.|
 
 ---
 
-## License
+## !{emoji desktop} Raw Button
+The raw button is a button that will show the **raw markdown/contents** of a post.
+![image|690x114](upload://jC3vzX0Anmsxsbnca8d6QXlXFSR.png)
+
+
+---
+
+## !{emoji lock} Obfuscated PMs
+
+You can encode a private message that will only decode for a specific username.
+
+### How to create:
+1. Click **"Encode Message"** in the Discourse sidebar (after loading the script).
+2. Type the visible message and the **username** (leave blank for public view).
+3. Click **Copy and Close** — a `!​{pm ...}` tag is copied to clipboard.
+
+### Decryption:
+Only the target user can see the message. Others will get `[This message is NOT for you!]`.
+
+---
+
+## !{emoji spinner} Technical Notes
+
+- Tags are processed using regex inside `.innerHTML` (with some injection sanitization).
+- MutationObserver handles dynamic posts/chats.
+- Uses XOR + reversed Base64 for encoding PMs.
+- Only handles elements within `.cooked` and `.chat-message-text`.
+
+---
+
+## !{emoji keyboard} Author
+
+**@e**
+Credits to:
+@i for the great UI and username detector code
+@Ivan_Zong for some great ideas
+ChatGPT - for writing 90% of the code
+
+---
+
+# License
 
 [CAT License](https://github.com/ethandacat/discourse-extras/blob/main/LICENSE.MD) © ethandacat
 
+---
+
+# Bonus: check if you have Discourse Extras installed
+If you have it installed, you should see Hello World here.
+
+!{pm XxH@==AAJEQHC8EDfUQAt4hAU0xFLwAA@HxX}
