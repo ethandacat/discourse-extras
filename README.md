@@ -1,13 +1,11 @@
 # Discourse Extras
->  Current version !{color green}v2.3!{s}
-Last update [date=2025-05-31 time=10:09:00 timezone="Pacific/Honolulu"]
 
 A userscript to extend Discourse post rendering with extra visual and secret-message features.  
 **More for viewing, less for writing.**
 
 ---
 
-## !{emoji flag} Features
+## Features
 
 - !{emoji square-check} Custom markdown tags like `!​{color red}`, `!​{style ...}`, `!​{embed}`, etc.
 - !{emoji gear} Obfuscated private messages with per-user visibility
