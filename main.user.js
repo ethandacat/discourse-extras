@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Discourse Extras
 // @namespace    ethandacatProductions
-// @version      2.2
+// @version      2.3
 // @description  More for viewing, less for writing.
 // @author       ethandacat
 // @match        https://x-camp.discourse.group/*
@@ -10,6 +10,12 @@
 // @downloadURL  https://github.com/ethandacat/flask-hello-world/raw/refs/heads/main/api/world/d-extra/d-extra.user.js
 // @updateURL    https://github.com/ethandacat/flask-hello-world/raw/refs/heads/main/api/world/d-extra/d-extra.user.js
 // ==/UserScript==
+
+var script = document.createElement("script");
+script.src = "https://kit.fontawesome.com/fcc6f02ae0.js";
+script.crossOrigin = "anonymous";
+document.head.appendChild(script);
+
 
 async function showRaw(postId) {
   const response = await fetch(`/posts/${postId}.json`);
@@ -26,7 +32,7 @@ function escapeHtml(str) {
     .replace(/'/g, "&#39;");
 }
 const rawbuttonhtml = `
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" class="fa d-icon svg-icon svg-string"><path d="M593.8 59.1H46.2C20.7 59.1 0 79.8 0 105.2v301.5c0 25.5 20.7 46.2 46.2 46.2h547.7c25.5 0 46.2-20.7 46.1-46.1V105.2c0-25.4-20.7-46.1-46.2-46.1zM338.5 360.6H277v-120l-61.5 76.9-61.5-76.9v120H92.3V151.4h61.5l61.5 76.9 61.5-76.9h61.5v209.2zm135.3 3.1L381.5 256H443V151.4h61.5V256H566z"/></svg>
+<i class="fa-brands fa-markdown"></i>
 <span aria-hidden="true">
         </span>
 `
@@ -161,7 +167,11 @@ function gText(element) {
                 mna = `<iframe srcdoc="${arg} ${argt}"></iframe>`
                 break;
             case "emoji":
-                mna = `<svg class="fa d-icon svg-icon svg-string" xmlns="http://www.w3.org/2000/svg"><use href="#${arg}"></use></svg>`;
+                if (argt !="") {
+                    mna = `<i class="fa-${argt} fa-${arg}"></i>`;
+                }else{
+                    mna = `<i class="fa-solid fa-${arg}"></i>`;
+                }
                 break;
             default:
                 mna = "<span style='color:red; background-color:yellow; padding:1px; margin:1px; border: 1px solid red; '>Invalid Discourse Extras Tag!</span>";
@@ -236,10 +246,10 @@ setInterval(() => {
         processCookedElement(element, true);
     })
     document.querySelectorAll(".chat-message-text").forEach(element => {
-        processCookedElement(element, true);
+        processCookedElement(element, false);
     })
     document.querySelectorAll(".d-editor-preview").forEach(element => {
-        processCookedElement(element, true);
+        processCookedElement(element, false);
     })
 },800)
 
